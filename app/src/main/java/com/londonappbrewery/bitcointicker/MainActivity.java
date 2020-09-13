@@ -21,6 +21,8 @@ import cz.msebera.android.httpclient.Header;
 public class MainActivity extends AppCompatActivity {
 
     private final String BASE_URL = "https://apiv2.bitcoin ...";
+    private final String APP_NAME = getString(R.string.app_name);
+    private final String APP_ID = BuildConfig.APP_ID;
 
     TextView mPriceTextView;
 
@@ -28,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Log.d(APP_NAME, "onCreate executed");
 
         mPriceTextView = (TextView) findViewById(R.id.price_textView);
         Spinner spinner = (Spinner) findViewById(R.id.currency_spinner);
@@ -43,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
         spinner.setAdapter(adapter);
 
         AdapterView.OnItemSelectedListener listener = spinner.getOnItemSelectedListener();
-
+        //TODO execute request for chosen currency
 
     }
 
@@ -57,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
 
-                Log.d("Clima", "JSON: " + response.toString());
+                Log.d(APP_NAME, "JSON response: " + response.toString());
                 DataModel data = DataModel.fromJson(response);
                 updateUI(data);
             }
@@ -65,8 +68,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject response) {
 
-                Log.d("Clima", "Request fail! Status code: " + statusCode);
-                Log.d("Clima", "Fail response: " + response);
+                Log.d(APP_NAME, "Request fail, code " + statusCode + ". Response: " + response);
                 Log.e("ERROR", e.toString());
                 Toast.makeText(MainActivity.this, "Problem with network", Toast.LENGTH_SHORT).show();
             }
