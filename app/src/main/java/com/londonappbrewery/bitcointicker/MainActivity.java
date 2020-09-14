@@ -20,8 +20,7 @@ import cz.msebera.android.httpclient.Header;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final String BASE_URL = getString(R.string.base_url);
-    private final String APP_NAME = getString(R.string.app_name);
+    private final String BASE_URL = "https://apiv2.bitcoinaverage.com/indices/global/ticker/BTC";
     private final String PUBLIC_KEY = BuildConfig.PUBLIC_KEY;
 
     TextView mPriceTextView;
@@ -30,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Log.d(APP_NAME, "onCreate executed");
+        Log.d("Bitcoin", "onCreate executed");
 
         mPriceTextView = (TextView) findViewById(R.id.price_textView);
         final Spinner spinner = (Spinner) findViewById(R.id.currency_spinner);
@@ -50,13 +49,13 @@ public class MainActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String item = (String) spinner.getItemAtPosition(position);
 
-                Log.d(APP_NAME, item + " was selected, executing request");
+                Log.d("Bitcoin", item + " was selected, executing request");
                 executeNetworkCall(item);
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                Log.d(APP_NAME, "Nothing was selected");
+                Log.d("Bitcoin", "Nothing was selected");
             }
         });
     }
@@ -70,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
 
-                Log.d(APP_NAME, "JSON response: " + response.toString());
+                Log.d("Bitcoin", "JSON response: " + response.toString());
                 DataModel data = DataModel.fromJson(response);
                 updateUI(data);
             }
@@ -78,18 +77,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject response) {
 
-                Log.d(APP_NAME, "Request failed, code " + statusCode + ". Response: " + response);
+                Log.d("Bitcoin", "Request failed, code " + statusCode + ". Response: " + response);
                 Log.e("ERROR", e.toString());
                 Toast.makeText(MainActivity.this, "Problem with network", Toast.LENGTH_SHORT).show();
             }
         });
-
-
     }
 
     private void updateUI(DataModel data) {
         mPriceTextView.setText(String.valueOf(data.getPrice()));
     }
-
-
 }
