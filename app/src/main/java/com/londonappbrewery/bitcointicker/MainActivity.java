@@ -3,6 +3,7 @@ package com.londonappbrewery.bitcointicker;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
@@ -11,7 +12,6 @@ import android.widget.Toast;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
-import com.loopj.android.http.RequestParams;
 
 import org.json.JSONObject;
 
@@ -20,9 +20,9 @@ import cz.msebera.android.httpclient.Header;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final String BASE_URL = "https://apiv2.bitcoin ...";
+    private final String BASE_URL = getString(R.string.base_url);
     private final String APP_NAME = getString(R.string.app_name);
-    private final String APP_ID = BuildConfig.APP_ID;
+    private final String PUBLIC_KEY = BuildConfig.PUBLIC_KEY;
 
     TextView mPriceTextView;
 
@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d(APP_NAME, "onCreate executed");
 
         mPriceTextView = (TextView) findViewById(R.id.price_textView);
-        Spinner spinner = (Spinner) findViewById(R.id.currency_spinner);
+        final Spinner spinner = (Spinner) findViewById(R.id.currency_spinner);
 
         // Create an ArrayAdapter using the String array and a spinner layout
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
@@ -45,17 +45,27 @@ public class MainActivity extends AppCompatActivity {
         // Apply the adapter to the spinner
         spinner.setAdapter(adapter);
 
-        AdapterView.OnItemSelectedListener listener = spinner.getOnItemSelectedListener();
-        //TODO execute request for chosen currency
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String item = (String) spinner.getItemAtPosition(position);
 
+                Log.d(APP_NAME, item + " was selected, executing request");
+                executeNetworkCall(item);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                Log.d(APP_NAME, "Nothing was selected");
+            }
+        });
     }
 
-    private void executeNetworkCall() {
+    private void executeNetworkCall(final String currency) {
 
         AsyncHttpClient client = new AsyncHttpClient();
-        RequestParams params = new RequestParams();
-
-        client.get(BASE_URL, params, new JsonHttpResponseHandler() {
+        client.addHeader("x-ba-key", PUBLIC_KEY);
+        client.get(BASE_URL + currency, new JsonHttpResponseHandler() {
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
@@ -68,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject response) {
 
-                Log.d(APP_NAME, "Request fail, code " + statusCode + ". Response: " + response);
+                Log.d(APP_NAME, "Request failed, code " + statusCode + ". Response: " + response);
                 Log.e("ERROR", e.toString());
                 Toast.makeText(MainActivity.this, "Problem with network", Toast.LENGTH_SHORT).show();
             }
@@ -78,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateUI(DataModel data) {
-
+        mPriceTextView.setText(String.valueOf(data.getPrice()));
     }
 
 
